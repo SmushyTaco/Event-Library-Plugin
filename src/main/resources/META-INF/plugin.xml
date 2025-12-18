@@ -1,6 +1,6 @@
 <!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
 <idea-plugin>
-  <id>com.smushytaco.event_library_plugin</id>
+  <id>event-library-plugin</id>
   <name>Event Library Plugin</name>
   <vendor
     url="https://github.com/SmushyTaco/Event-Library-Plugin"
