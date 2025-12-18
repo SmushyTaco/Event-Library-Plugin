@@ -1,4 +1,4 @@
-# Event Library IntelliJ Plugin
+# Event Library Helper Plugin
 
 IntelliJ IDEA inspections and quick-fixes for [Event Library](https://github.com/SmushyTaco/Event-Library)
 
@@ -105,7 +105,7 @@ From JetBrains Marketplace:
 
 1.  Open Settings / Preferences
 2.  Go to Plugins
-3.  Search for **Event Library Plugin**
+3.  Search for **Event Library Helper**
 4.  Click Install
 5.  Restart IDE
 
