@@ -5,6 +5,8 @@
 kotlin = "2.3.0"
 # Check this on https://plugins.gradle.org/plugin/org.jetbrains.intellij.platform/
 intelliJPlatform = "2.10.5"
+# Check this on https://plugins.gradle.org/plugin/dev.yumi.gradle.licenser/
+yumiGradleLicenser = "2.2.1"
 ##########################################################################
 # Java Configuration
 # The Java version the JDK will be for compiling and running code.
@@ -20,3 +22,4 @@ gradle = "9.2.1"
 [plugins]
 intelliJPlatform = { id = "org.jetbrains.intellij.platform", version.ref = "intelliJPlatform" }
 kotlin = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+yumiGradleLicenser = { id = "dev.yumi.gradle.licenser", version.ref = "yumiGradleLicenser" }

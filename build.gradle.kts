@@ -5,21 +5,20 @@ plugins {
     id("java")
     alias(libs.plugins.kotlin)
     alias(libs.plugins.intelliJPlatform)
+    alias(libs.plugins.yumiGradleLicenser)
 }
 
-val name = providers.gradleProperty("name")
-val projectGroup = providers.gradleProperty("group")
-val projectVersion = providers.gradleProperty("version")
-val projectDescription = providers.gradleProperty("description")
-
-val publishingUrl = providers.gradleProperty("url")
+val pluginName = providers.gradleProperty("name")
+val pluginGroup = providers.gradleProperty("group")
+val pluginVersion = providers.gradleProperty("version")
+val pluginDescription = providers.gradleProperty("description")
 
 val javaVersion = libs.versions.java.map { it.toInt() }
 
-base.archivesName = name
-group = projectGroup.get()
-version = projectVersion.get()
-description = projectDescription.get()
+base.archivesName = pluginName
+group = pluginGroup.get()
+version = pluginVersion.get()
+description = pluginDescription.get()
 
 repositories {
     mavenCentral()
@@ -35,8 +34,7 @@ dependencies {
 }
 intellijPlatform {
     pluginConfiguration {
-        name = name
-        version = projectVersion
+        version = pluginVersion
         description = "An IntelliJ plugin for my high performance event system"
         changeNotes = ""
         ideaVersion { sinceBuild = providers.gradleProperty("plugin_since_build") }
@@ -48,7 +46,7 @@ intellijPlatform {
     }
     publishing {
         token = providers.environmentVariable("PUBLISH_TOKEN")
-        channels = projectVersion.map { listOf(it.substringAfter('-', "").substringBefore('.').ifEmpty { "default" }) }
+        channels = pluginVersion.map { listOf(it.substringAfter('-', "").substringBefore('.').ifEmpty { "default" }) }
     }
     pluginVerification {
         ides {
@@ -113,4 +111,10 @@ tasks {
     wrapper {
         gradleVersion = libs.versions.gradle.get()
     }
+}
+license {
+    rule(file("./HEADER"))
+    include("**/*.kt")
+    exclude("**/*.properties")
+    exclude("**/*.xml")
 }
