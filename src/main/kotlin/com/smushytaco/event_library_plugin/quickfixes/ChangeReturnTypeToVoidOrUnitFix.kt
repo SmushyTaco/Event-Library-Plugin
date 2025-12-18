@@ -31,12 +31,30 @@ import com.intellij.psi.util.PsiTreeUtil
 import com.smushytaco.event_library_plugin.MyBundle
 import org.jetbrains.kotlin.psi.KtNamedFunction
 import org.jetbrains.kotlin.psi.KtPsiFactory
+import org.jetbrains.plugins.scala.lang.psi.api.statements.ScFunctionDefinition
+import org.jetbrains.plugins.scala.lang.psi.impl.ScalaPsiElementFactory
+import org.jetbrains.plugins.scala.project.ScalaFeatures
 
 class ChangeReturnTypeToVoidOrUnitFix : LocalQuickFix {
     override fun getFamilyName(): String = MyBundle.message("quickfix.changeReturnTypeToVoidOrUnit")
 
     override fun applyFix(project: Project, descriptor: ProblemDescriptor) {
         val element = descriptor.psiElement
+
+        PsiTreeUtil.getParentOfType(element, ScFunctionDefinition::class.java, false)?.let { scFn ->
+            WriteCommandAction.runWriteCommandAction(project) {
+                val rteOpt = scFn.returnTypeElement()
+                if (rteOpt != null && rteOpt.isDefined) {
+                    val rte = rteOpt.get()
+
+                    val features = ScalaFeatures.forPsiOrDefault(scFn)
+                    val newType = ScalaPsiElementFactory.createTypeElementFromText("Unit", features, project)
+
+                    rte.replace(newType)
+                }
+            }
+            return
+        }
 
         PsiTreeUtil.getParentOfType(element, PsiMethod::class.java, false)?.let { psiMethod ->
             WriteCommandAction.runWriteCommandAction(project) {

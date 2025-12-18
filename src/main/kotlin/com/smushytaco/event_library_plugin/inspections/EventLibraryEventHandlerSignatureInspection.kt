@@ -19,15 +19,11 @@ package com.smushytaco.event_library_plugin.inspections
 import com.intellij.codeInspection.AbstractBaseUastLocalInspectionTool
 import com.intellij.codeInspection.ProblemHighlightType
 import com.intellij.codeInspection.ProblemsHolder
-import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiElementVisitor
-import com.intellij.psi.PsiMethod
 import com.intellij.uast.UastVisitorAdapter
 import com.smushytaco.event_library_plugin.MyBundle
 import com.smushytaco.event_library_plugin.Utility
-import org.jetbrains.kotlin.psi.KtNamedFunction
 import org.jetbrains.uast.UMethod
-import org.jetbrains.uast.sourcePsiElement
 import org.jetbrains.uast.visitor.AbstractUastNonRecursiveVisitor
 
 class EventLibraryEventHandlerSignatureInspection : AbstractBaseUastLocalInspectionTool() {
@@ -41,23 +37,22 @@ class EventLibraryEventHandlerSignatureInspection : AbstractBaseUastLocalInspect
 
                 val psi = node.sourcePsi ?: return true
 
-                // Rule 1: exactly one parameter
                 val paramCount = node.uastParameters.size
                 if (paramCount != 1) {
-                    val anchor = anchorForParameterCountProblem(psi, node) ?: return true
+                    val anchor = Utility.anchorForParamList(psi, node) ?: return true
                     holder.registerProblem(
                         anchor,
                         MyBundle.message("inspection.eventHandler.mustHaveExactlyOneParameter"),
                         ProblemHighlightType.ERROR
                     )
-                    return true // no need to run type check if count is wrong
+                    return true
                 }
 
                 val uParam = node.uastParameters.first()
                 val paramType = uParam.type
 
                 if (!Utility.isAssignableToFqn(paramType, Utility.EVENT_FQN, psi)) {
-                    val anchor = anchorForBadEventParameter(psi, node) ?: return true
+                    val anchor = Utility.anchorForSingleParamType(psi, node) ?: return true
                     holder.registerProblem(
                         anchor,
                         MyBundle.message("inspection.eventHandler.parameterMustImplementEvent"),
@@ -68,27 +63,5 @@ class EventLibraryEventHandlerSignatureInspection : AbstractBaseUastLocalInspect
                 return true
             }
         }, true)
-    }
-
-    private fun anchorForParameterCountProblem(psi: PsiElement?, node: UMethod): PsiElement? {
-        val candidate: PsiElement? = when (psi) {
-            is PsiMethod -> psi.parameterList
-            is KtNamedFunction -> psi.valueParameterList
-            else -> null
-        }
-        return candidate?.takeIf { it.textLength > 0 }
-            ?: node.uastAnchor?.sourcePsi
-            ?: psi
-            ?: node.sourcePsiElement
-    }
-
-    private fun anchorForBadEventParameter(psi: PsiElement?, node: UMethod): PsiElement? {
-        val candidate: PsiElement? = when (psi) {
-            is PsiMethod -> psi.parameterList.parameters.firstOrNull()?.typeElement
-            is KtNamedFunction -> psi.valueParameters.firstOrNull()?.typeReference
-            else -> null
-        }
-        return candidate?.takeIf { it.textLength > 0 }
-            ?: anchorForParameterCountProblem(psi, node)
     }
 }

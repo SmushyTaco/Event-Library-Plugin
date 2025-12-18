@@ -26,6 +26,7 @@ import com.smushytaco.event_library_plugin.MyBundle
 import com.smushytaco.event_library_plugin.Utility
 import com.smushytaco.event_library_plugin.quickfixes.ChangeReturnTypeToVoidOrUnitFix
 import org.jetbrains.kotlin.psi.KtNamedFunction
+import org.jetbrains.plugins.scala.lang.psi.api.statements.ScFunctionDefinition
 import org.jetbrains.uast.UMethod
 import org.jetbrains.uast.visitor.AbstractUastNonRecursiveVisitor
 
@@ -40,6 +41,10 @@ class EventLibraryReturnTypeInspection : AbstractBaseUastLocalInspectionTool() {
 
                 val psi = node.sourcePsi
                 val returnTypeAnchor = when (psi) {
+                    is ScFunctionDefinition -> {
+                        val opt = psi.returnTypeElement()
+                        if (opt != null && opt.isDefined()) opt.get() else psi.nameId()
+                    }
                     is PsiMethod -> psi.returnTypeElement
                     is KtNamedFunction -> psi.typeReference
                     else -> null
@@ -67,6 +72,6 @@ class EventLibraryReturnTypeInspection : AbstractBaseUastLocalInspectionTool() {
 
     private fun UMethod.returnsVoidOrUnit(): Boolean {
         val t = returnType?.canonicalText ?: return false
-        return t == "void" || t == "kotlin.Unit"
+        return t == "void" || t == "kotlin.Unit" || t == "scala.Unit"
     }
 }

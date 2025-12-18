@@ -27,8 +27,9 @@ import com.smushytaco.event_library_plugin.MyBundle
 import com.smushytaco.event_library_plugin.Utility
 import com.smushytaco.event_library_plugin.quickfixes.SwapExceptionHandlerParametersFix
 import org.jetbrains.kotlin.psi.KtNamedFunction
+import org.jetbrains.plugins.scala.lang.psi.api.statements.ScFunctionDefinition
+import org.jetbrains.plugins.scala.lang.psi.api.statements.params.ScParameter
 import org.jetbrains.uast.UMethod
-import org.jetbrains.uast.sourcePsiElement
 import org.jetbrains.uast.visitor.AbstractUastNonRecursiveVisitor
 
 class EventLibraryExceptionHandlerSignatureInspection : AbstractBaseUastLocalInspectionTool() {
@@ -44,7 +45,7 @@ class EventLibraryExceptionHandlerSignatureInspection : AbstractBaseUastLocalIns
                 val params = node.uastParameters
 
                 if (params.size != 1 && params.size != 2) {
-                    val anchor = anchorForParamList(psi, node) ?: return true
+                    val anchor = Utility.anchorForParamList(psi, node) ?: return true
                     holder.registerProblem(
                         anchor,
                         MyBundle.message("inspection.exceptionHandler.invalidShape"),
@@ -60,7 +61,7 @@ class EventLibraryExceptionHandlerSignatureInspection : AbstractBaseUastLocalIns
                             Utility.isAssignableToFqn(p0Type, Utility.KOTLIN_THROWABLE_FQN, psi)
 
                     if (!isEvent && !isThrowable) {
-                        val anchor = anchorForSingleParamType(psi, node) ?: anchorForParamList(psi, node) ?: return true
+                        val anchor = Utility.anchorForSingleParamType(psi, node) ?: Utility.anchorForParamList(psi, node) ?: return true
                         holder.registerProblem(
                             anchor,
                             MyBundle.message("inspection.exceptionHandler.singleParamMustBeEventOrThrowable"),
@@ -83,7 +84,7 @@ class EventLibraryExceptionHandlerSignatureInspection : AbstractBaseUastLocalIns
                 if (p0IsEvent && p1IsThrowable) return true
 
                 if (p0IsThrowable && p1IsEvent) {
-                    val anchor = anchorForParamList(psi, node) ?: return true
+                    val anchor = Utility.anchorForParamList(psi, node) ?: return true
                     holder.registerProblem(
                         anchor,
                         MyBundle.message("inspection.exceptionHandler.reversedOrder"),
@@ -93,10 +94,10 @@ class EventLibraryExceptionHandlerSignatureInspection : AbstractBaseUastLocalIns
                     return true
                 }
 
-                val listAnchor = anchorForParamList(psi, node)
+                val listAnchor = Utility.anchorForParamList(psi, node)
 
                 if (!p0IsEvent) {
-                    val anchor = anchorForParam0Type(psi, node) ?: listAnchor
+                    val anchor = Utility.anchorForSingleParamType(psi, node) ?: listAnchor
                     if (anchor != null) {
                         holder.registerProblem(
                             anchor,
@@ -122,42 +123,23 @@ class EventLibraryExceptionHandlerSignatureInspection : AbstractBaseUastLocalIns
         }, true)
     }
 
-    private fun anchorForParamList(psi: PsiElement?, node: UMethod): PsiElement? {
-        val candidate: PsiElement? = when (psi) {
-            is PsiMethod -> psi.parameterList
-            is KtNamedFunction -> psi.valueParameterList
-            else -> null
-        }
-        return candidate?.takeIf { it.textLength > 0 }
-            ?: node.uastAnchor?.sourcePsi
-            ?: psi
-            ?: node.sourcePsiElement
-    }
-
-    private fun anchorForSingleParamType(psi: PsiElement?, node: UMethod): PsiElement? {
-        val candidate: PsiElement? = when (psi) {
-            is PsiMethod -> psi.parameterList.parameters.firstOrNull()?.typeElement
-            is KtNamedFunction -> psi.valueParameters.firstOrNull()?.typeReference
-            else -> null
-        }
-        return candidate?.takeIf { it.textLength > 0 } ?: anchorForParamList(psi, node)
-    }
-
-    private fun anchorForParam0Type(psi: PsiElement?, node: UMethod): PsiElement? {
-        val candidate: PsiElement? = when (psi) {
-            is PsiMethod -> psi.parameterList.parameters.getOrNull(0)?.typeElement
-            is KtNamedFunction -> psi.valueParameters.getOrNull(0)?.typeReference
-            else -> null
-        }
-        return candidate?.takeIf { it.textLength > 0 } ?: anchorForParamList(psi, node)
-    }
-
     private fun anchorForParam1Type(psi: PsiElement?, node: UMethod): PsiElement? {
         val candidate: PsiElement? = when (psi) {
+            is ScFunctionDefinition -> {
+                val seq = psi.paramClauses().params()
+                val it = seq.iterator()
+                if (it.hasNext()) it.next()
+                val p0: ScParameter? = if (it.hasNext()) it.next() else null
+                val teOpt = p0?.typeElement()
+                when {
+                    teOpt != null && teOpt.isDefined() -> teOpt.get()
+                    else -> p0
+                }
+            }
             is PsiMethod -> psi.parameterList.parameters.getOrNull(1)?.typeElement
             is KtNamedFunction -> psi.valueParameters.getOrNull(1)?.typeReference
             else -> null
         }
-        return candidate?.takeIf { it.textLength > 0 } ?: anchorForParamList(psi, node)
+        return candidate?.takeIf { it.textLength > 0 } ?: Utility.anchorForParamList(psi, node)
     }
 }

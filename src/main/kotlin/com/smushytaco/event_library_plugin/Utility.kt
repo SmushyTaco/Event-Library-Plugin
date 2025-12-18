@@ -16,11 +16,13 @@
 
 package com.smushytaco.event_library_plugin
 
-import com.intellij.psi.PsiClass
-import com.intellij.psi.PsiElement
-import com.intellij.psi.PsiPrimitiveType
-import com.intellij.psi.PsiType
+import com.intellij.psi.*
 import com.intellij.psi.util.PsiUtil
+import org.jetbrains.kotlin.psi.KtNamedFunction
+import org.jetbrains.plugins.scala.lang.psi.api.statements.ScFunctionDefinition
+import org.jetbrains.plugins.scala.lang.psi.api.statements.params.ScParameter
+import org.jetbrains.uast.UMethod
+import org.jetbrains.uast.sourcePsiElement
 
 object Utility {
     const val EVENT_HANDLER_FQN = "com.smushytaco.event_library.api.EventHandler"
@@ -66,5 +68,37 @@ object Utility {
             }
         }
         return false
+    }
+
+    fun anchorForSingleParamType(psi: PsiElement?, node: UMethod): PsiElement? {
+        val candidate: PsiElement? = when (psi) {
+            is ScFunctionDefinition -> {
+                val seq = psi.paramClauses().params()
+                val it = seq.iterator()
+                val p0: ScParameter? = if (it.hasNext()) it.next() else null
+                val teOpt = p0?.typeElement()
+                when {
+                    teOpt != null && teOpt.isDefined() -> teOpt.get()
+                    else -> p0
+                }
+            }
+            is PsiMethod -> psi.parameterList.parameters.firstOrNull()?.typeElement
+            is KtNamedFunction -> psi.valueParameters.firstOrNull()?.typeReference
+            else -> null
+        }
+        return candidate?.takeIf { it.textLength > 0 } ?: anchorForParamList(psi, node)
+    }
+
+    fun anchorForParamList(psi: PsiElement?, node: UMethod): PsiElement? {
+        val candidate: PsiElement? = when (psi) {
+            is ScFunctionDefinition -> psi.paramClauses()
+            is PsiMethod -> psi.parameterList
+            is KtNamedFunction -> psi.valueParameterList
+            else -> null
+        }
+        return candidate?.takeIf { it.textLength > 0 }
+            ?: node.uastAnchor?.sourcePsi
+            ?: psi
+            ?: node.sourcePsiElement
     }
 }
