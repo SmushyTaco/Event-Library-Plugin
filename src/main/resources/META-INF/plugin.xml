@@ -2,9 +2,7 @@
 <idea-plugin>
   <id>event-library-plugin</id>
   <name>Event Library Plugin</name>
-  <vendor
-    url="https://github.com/SmushyTaco/Event-Library-Plugin"
-    email="personal@nikanradan.com">Nikan Radan</vendor>
+  <vendor email="personal@nikanradan.com">Nikan Radan</vendor>
 
   <depends>com.intellij.modules.platform</depends>
   <depends>com.intellij.java</depends>
