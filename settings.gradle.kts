@@ -1,5 +1,15 @@
-plugins {
-    id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
+val name = providers.gradleProperty("name")
+rootProject.name = name.get()
+pluginManagement {
+    repositories {
+        mavenCentral()
+        gradlePluginPortal()
+    }
+    val foojayResolverVersion = providers.gradleProperty("foojay_resolver_version")
+    plugins {
+        id("org.gradle.toolchains.foojay-resolver-convention").version(foojayResolverVersion.get())
+    }
 }
-
-rootProject.name = "Event-Library-Plugin"
+plugins {
+    id("org.gradle.toolchains.foojay-resolver-convention")
+}
