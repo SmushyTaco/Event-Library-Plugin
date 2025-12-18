@@ -35,7 +35,7 @@ dependencies {
 intellijPlatform {
     pluginConfiguration {
         version = pluginVersion
-        description = "An IntelliJ plugin for my high performance event system"
+        description = pluginDescription
         changeNotes = ""
         ideaVersion { sinceBuild = providers.gradleProperty("plugin_since_build") }
     }
