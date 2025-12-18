@@ -2,7 +2,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    id("java")
+    java
     alias(libs.plugins.kotlin)
     alias(libs.plugins.intelliJPlatform)
     alias(libs.plugins.yumiGradleLicenser)
