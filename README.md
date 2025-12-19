@@ -105,7 +105,7 @@ From JetBrains Marketplace:
 
 1.  Open Settings / Preferences
 2.  Go to Plugins
-3.  Search for **Event Library Helper**
+3.  Search for **[Event Library Helper](https://plugins.jetbrains.com/plugin/29413-event-library-helper)**
 4.  Click Install
 5.  Restart IDE
 
