@@ -96,6 +96,7 @@ tasks {
     withType<Test>().configureEach { defaultCharacterEncoding = "UTF-8" }
     withType<KotlinCompile>().configureEach {
         compilerOptions {
+            moduleName = project.name
             extraWarnings = true
             jvmTarget = javaVersion.map { JvmTarget.valueOf("JVM_${if (it == 8) "1_8" else it}") }
         }

@@ -37,6 +37,7 @@ class EventLibraryExceptionHandlerSignatureInspection : AbstractBaseUastLocalIns
     override fun buildVisitor(holder: ProblemsHolder, isOnTheFly: Boolean): PsiElementVisitor {
         return UastVisitorAdapter(object : AbstractUastNonRecursiveVisitor() {
 
+            @Suppress("kotlin:S6619")
             override fun visitMethod(node: UMethod): Boolean {
                 if (node.isConstructor) return true
                 if (node.findAnnotation(Utility.EXCEPTION_HANDLER_FQN) == null) return true

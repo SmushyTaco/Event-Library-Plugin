@@ -43,9 +43,7 @@ object Utility {
         if (normalized == targetFqn) return true
 
         val resolved = PsiUtil.resolveClassInType(erased) ?: return false
-        if (resolved.qualifiedName == targetFqn) return true
-
-        return hasSuperNamed(resolved, targetFqn)
+        return resolved.qualifiedName == targetFqn || hasSuperNamed(resolved, targetFqn)
     }
 
     private fun hasSuperNamed(start: PsiClass, targetFqn: String): Boolean {

@@ -29,6 +29,7 @@ import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiMethod
 import com.intellij.psi.util.PsiTreeUtil
 import com.smushytaco.event_library_plugin.MyBundle
+import org.jetbrains.kotlin.idea.base.psi.setFunctionTypeReference
 import org.jetbrains.kotlin.psi.KtNamedFunction
 import org.jetbrains.kotlin.psi.KtPsiFactory
 import org.jetbrains.plugins.scala.lang.psi.api.statements.ScFunctionDefinition
@@ -80,7 +81,7 @@ class ChangeReturnTypeToVoidOrUnitFix : LocalQuickFix {
                     PsiDocumentManager.getInstance(project).commitDocument(doc)
                 } else {
                     val ktFactory = KtPsiFactory(project)
-                    ktFn.typeReference = ktFactory.createType("Unit")
+                    ktFn.setFunctionTypeReference(ktFactory.createType("Unit"))
                 }
             }
             return
